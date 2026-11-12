@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wms.mapper.WmsInboundOrderMapper">
+    
+    <resultMap type="WmsInboundOrder" id="WmsInboundOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="warehouseId"    column="warehouse_id"    />
+        <result property="status"    column="status"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectWmsInboundOrderVo">
+        select id, order_no, order_type, warehouse_id, status, remark, create_by, create_time, update_by, update_time from wms_inbound_order
+    </sql>
+
+    <select id="selectWmsInboundOrderList" parameterType="WmsInboundOrder" resultMap="WmsInboundOrderResult">
+        <include refid="selectWmsInboundOrderVo"/>
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="orderType != null "> and order_type = #{orderType}</if>
+            <if test="warehouseId != null "> and warehouse_id = #{warehouseId}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectWmsInboundOrderById" parameterType="Long" resultMap="WmsInboundOrderResult">
+        <include refid="selectWmsInboundOrderVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWmsInboundOrder" parameterType="WmsInboundOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into wms_inbound_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="warehouseId != null">warehouse_id,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="orderType != null">#{orderType},</if>
+            <if test="warehouseId != null">#{warehouseId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWmsInboundOrder" parameterType="WmsInboundOrder">
+        update wms_inbound_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWmsInboundOrderById" parameterType="Long">
+        delete from wms_inbound_order where id = #{id}
+    </delete>
+
+    <delete id="deleteWmsInboundOrderByIds" parameterType="String">
+        delete from wms_inbound_order where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wms.mapper.WmsOutboundDetailMapper">
+    
+    <resultMap type="WmsOutboundDetail" id="WmsOutboundDetailResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="materialId"    column="material_id"    />
+        <result property="planQty"    column="plan_qty"    />
+        <result property="actualQty"    column="actual_qty"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectWmsOutboundDetailVo">
+        select id, order_id, order_no, material_id, plan_qty, actual_qty, create_time from wms_outbound_detail
+    </sql>
+
+    <select id="selectWmsOutboundDetailList" parameterType="WmsOutboundDetail" resultMap="WmsOutboundDetailResult">
+        <include refid="selectWmsOutboundDetailVo"/>
+        <where>  
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="materialId != null "> and material_id = #{materialId}</if>
+            <if test="planQty != null "> and plan_qty = #{planQty}</if>
+            <if test="actualQty != null "> and actual_qty = #{actualQty}</if>
+        </where>
+    </select>
+    
+    <select id="selectWmsOutboundDetailById" parameterType="Long" resultMap="WmsOutboundDetailResult">
+        <include refid="selectWmsOutboundDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWmsOutboundDetail" parameterType="WmsOutboundDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into wms_outbound_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="materialId != null">material_id,</if>
+            <if test="planQty != null">plan_qty,</if>
+            <if test="actualQty != null">actual_qty,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="materialId != null">#{materialId},</if>
+            <if test="planQty != null">#{planQty},</if>
+            <if test="actualQty != null">#{actualQty},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWmsOutboundDetail" parameterType="WmsOutboundDetail">
+        update wms_outbound_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="materialId != null">material_id = #{materialId},</if>
+            <if test="planQty != null">plan_qty = #{planQty},</if>
+            <if test="actualQty != null">actual_qty = #{actualQty},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWmsOutboundDetailById" parameterType="Long">
+        delete from wms_outbound_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteWmsOutboundDetailByIds" parameterType="String">
+        delete from wms_outbound_detail where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

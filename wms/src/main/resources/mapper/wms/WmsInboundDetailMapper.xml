@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wms.mapper.WmsInboundDetailMapper">
+    
+    <resultMap type="WmsInboundDetail" id="WmsInboundDetailResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="materialId"    column="material_id"    />
+        <result property="locationId"    column="location_id"    />
+        <result property="planQty"    column="plan_qty"    />
+        <result property="qualifiedQty"    column="qualified_qty"    />
+        <result property="defectiveQty"    column="defective_qty"    />
+        <result property="defectReason"    column="defect_reason"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectWmsInboundDetailVo">
+        select id, order_id, order_no, material_id, location_id, plan_qty, qualified_qty, defective_qty, defect_reason, create_time from wms_inbound_detail
+    </sql>
+
+    <select id="selectWmsInboundDetailList" parameterType="WmsInboundDetail" resultMap="WmsInboundDetailResult">
+        <include refid="selectWmsInboundDetailVo"/>
+        <where>  
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="materialId != null "> and material_id = #{materialId}</if>
+            <if test="locationId != null "> and location_id = #{locationId}</if>
+            <if test="planQty != null "> and plan_qty = #{planQty}</if>
+            <if test="qualifiedQty != null "> and qualified_qty = #{qualifiedQty}</if>
+            <if test="defectiveQty != null "> and defective_qty = #{defectiveQty}</if>
+            <if test="defectReason != null  and defectReason != ''"> and defect_reason = #{defectReason}</if>
+        </where>
+    </select>
+    
+    <select id="selectWmsInboundDetailById" parameterType="Long" resultMap="WmsInboundDetailResult">
+        <include refid="selectWmsInboundDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWmsInboundDetail" parameterType="WmsInboundDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into wms_inbound_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="materialId != null">material_id,</if>
+            <if test="locationId != null">location_id,</if>
+            <if test="planQty != null">plan_qty,</if>
+            <if test="qualifiedQty != null">qualified_qty,</if>
+            <if test="defectiveQty != null">defective_qty,</if>
+            <if test="defectReason != null">defect_reason,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="materialId != null">#{materialId},</if>
+            <if test="locationId != null">#{locationId},</if>
+            <if test="planQty != null">#{planQty},</if>
+            <if test="qualifiedQty != null">#{qualifiedQty},</if>
+            <if test="defectiveQty != null">#{defectiveQty},</if>
+            <if test="defectReason != null">#{defectReason},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWmsInboundDetail" parameterType="WmsInboundDetail">
+        update wms_inbound_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="materialId != null">material_id = #{materialId},</if>
+            <if test="locationId != null">location_id = #{locationId},</if>
+            <if test="planQty != null">plan_qty = #{planQty},</if>
+            <if test="qualifiedQty != null">qualified_qty = #{qualifiedQty},</if>
+            <if test="defectiveQty != null">defective_qty = #{defectiveQty},</if>
+            <if test="defectReason != null">defect_reason = #{defectReason},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWmsInboundDetailById" parameterType="Long">
+        delete from wms_inbound_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteWmsInboundDetailByIds" parameterType="String">
+        delete from wms_inbound_detail where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

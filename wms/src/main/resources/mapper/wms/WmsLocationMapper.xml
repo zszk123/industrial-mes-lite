@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wms.mapper.WmsLocationMapper">
+    
+    <resultMap type="WmsLocation" id="WmsLocationResult">
+        <result property="id"    column="id"    />
+        <result property="warehouseId"    column="warehouse_id"    />
+        <result property="locationCode"    column="location_code"    />
+        <result property="zoneCode"    column="zone_code"    />
+        <result property="status"    column="status"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectWmsLocationVo">
+        select id, warehouse_id, location_code, zone_code, status, remark, create_by, create_time, update_by, update_time from wms_location
+    </sql>
+
+    <select id="selectWmsLocationList" parameterType="WmsLocation" resultMap="WmsLocationResult">
+        <include refid="selectWmsLocationVo"/>
+        <where>  
+            <if test="warehouseId != null "> and warehouse_id = #{warehouseId}</if>
+            <if test="locationCode != null  and locationCode != ''"> and location_code = #{locationCode}</if>
+            <if test="zoneCode != null  and zoneCode != ''"> and zone_code = #{zoneCode}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectWmsLocationById" parameterType="Long" resultMap="WmsLocationResult">
+        <include refid="selectWmsLocationVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWmsLocation" parameterType="WmsLocation" useGeneratedKeys="true" keyProperty="id">
+        insert into wms_location
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="warehouseId != null">warehouse_id,</if>
+            <if test="locationCode != null and locationCode != ''">location_code,</if>
+            <if test="zoneCode != null">zone_code,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="warehouseId != null">#{warehouseId},</if>
+            <if test="locationCode != null and locationCode != ''">#{locationCode},</if>
+            <if test="zoneCode != null">#{zoneCode},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWmsLocation" parameterType="WmsLocation">
+        update wms_location
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
+            <if test="locationCode != null and locationCode != ''">location_code = #{locationCode},</if>
+            <if test="zoneCode != null">zone_code = #{zoneCode},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWmsLocationById" parameterType="Long">
+        delete from wms_location where id = #{id}
+    </delete>
+
+    <delete id="deleteWmsLocationByIds" parameterType="String">
+        delete from wms_location where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
