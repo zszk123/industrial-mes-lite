@@ -118,4 +118,20 @@ public class WmsInboundOrderController extends BaseController
     {
         return toAjax(wmsInboundOrderService.completeInboundOrder(id));
     }
+
+    /**
+     * 取消入库单（待验收 → 已取消；已完成入库 → 回溯流水扣回库存后 → 已取消）
+     * 接口文档：
+     * 请求方式：PUT /wms/inbound/{id}/cancel
+     * 权限标识：wms:inbound:cancel
+     * 成功返回：{"code":200,"msg":"操作成功"}
+     * 业务失败返回：{"code":500,"msg":"物料当前可用库存不足（已被领用），无法取消入库"}（示例）
+     */
+    @PreAuthorize("@ss.hasPermi('wms:inbound:cancel')")
+    @Log(title = "入库单取消", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/cancel")
+    public AjaxResult cancel(@PathVariable("id") Long id)
+    {
+        return toAjax(wmsInboundOrderService.cancelInboundOrder(id));
+    }
 }

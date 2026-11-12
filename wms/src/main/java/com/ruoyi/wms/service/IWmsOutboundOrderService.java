@@ -60,11 +60,21 @@ public interface IWmsOutboundOrderService
     public int deleteWmsOutboundOrderById(Long id);
 
     /**
-     * 审核通过出库主单（待审核 → 已审核待出库，纯审批，不操作库存）
-     * 流程：Redis 幂等防重 → 校验明细 → 状态 CAS 更新；库存扣减在"出库完成"（1→2）执行
+     * 出库主流程（待审核 → 已完成出库）
+     * 流程：Redis 幂等防重 → 事务内逐行扣减库存（条件 UPDATE 防超卖）→ 写 OUTBOUND 审计流水 → 状态 CAS 直改为 2
+     * 说明：状态 1（已审核待出库）为后续 MQ 异步化预留的中间态，当前流程不使用
      *
      * @param id 出库主单主键
      * @return 结果
      */
     public int approveOutboundOrder(Long id);
+
+    /**
+     * 取消出库单（待审核/已审核待出库/已完成出库 → 已取消；已完成出库 → 回溯流水回补库存后 → 已取消）
+     * 流程：查主单状态 → Redis 幂等防重 → 查询 OUTBOUND 流水逐条回补库存 → 状态 CAS 更新 → 删除幂等键
+     *
+     * @param id 出库主单主键
+     * @return 结果
+     */
+    public int cancelOutboundOrder(Long id);
 }

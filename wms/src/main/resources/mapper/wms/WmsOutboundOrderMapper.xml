@@ -66,6 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
+    <!-- 通用修改接口：不允许修改 status，状态流转统一由审核/出库/取消等专用接口维护 -->
     <update id="updateWmsOutboundOrder" parameterType="WmsOutboundOrder">
         update wms_outbound_order
         <trim prefix="SET" suffixOverrides=",">
@@ -73,7 +74,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="orderType != null">order_type = #{orderType},</if>
             <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
             <if test="applyDeptId != null">apply_dept_id = #{applyDeptId},</if>
-            <if test="status != null">status = #{status},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
@@ -94,12 +94,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
 
+    <!-- 出库主流程：状态1为后续MQ预留中间态，当前由待审核直改为已完成出库 -->
     <update id="approveWmsOutboundOrder">
         update wms_outbound_order
-           set status = '1',
+           set status = '2',
                update_by = #{updateBy},
                update_time = sysdate()
          where id = #{id}
            and status = '0'
+    </update>
+
+    <update id="cancelWmsOutboundOrder">
+        update wms_outbound_order
+           set status = '3',
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where id = #{id}
+           and status in ('0', '2')
     </update>
 </mapper>

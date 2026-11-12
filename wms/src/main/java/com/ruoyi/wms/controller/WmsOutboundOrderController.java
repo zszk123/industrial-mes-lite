@@ -103,12 +103,12 @@ public class WmsOutboundOrderController extends BaseController
     }
 
     /**
-     * 审核通过出库单（待审核 → 已审核待出库，纯审批不操作库存）
+     * 出库主流程（待审核 → 已完成出库，扣减库存+写流水+状态直改为2；状态1为后续MQ预留中间态）
      * 接口文档：
      * 请求方式：PUT /wms/outbound/{id}/approve
      * 权限标识：wms:outbound:approve
      * 成功返回：{"code":200,"msg":"操作成功"}
-     * 业务失败返回：{"code":500,"msg":"当前单据状态不允许审核"}（示例）
+     * 业务失败返回：{"code":500,"msg":"物料[xxx]可用库存不足，还缺 n 个"}（示例）
      */
     @PreAuthorize("@ss.hasPermi('wms:outbound:approve')")
     @Log(title = "出库单审核", businessType = BusinessType.UPDATE)
@@ -116,5 +116,21 @@ public class WmsOutboundOrderController extends BaseController
     public AjaxResult approve(@PathVariable("id") Long id)
     {
         return toAjax(wmsOutboundOrderService.approveOutboundOrder(id));
+    }
+
+    /**
+     * 取消出库单（待审核/已审核待出库/已完成出库 → 已取消；已完成出库 → 回溯流水回补库存后 → 已取消）
+     * 接口文档：
+     * 请求方式：PUT /wms/outbound/{id}/cancel
+     * 权限标识：wms:outbound:cancel
+     * 成功返回：{"code":200,"msg":"操作成功"}
+     * 业务失败返回：{"code":500,"msg":"单据已取消，请勿重复操作"}（示例）
+     */
+    @PreAuthorize("@ss.hasPermi('wms:outbound:cancel')")
+    @Log(title = "出库单取消", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/cancel")
+    public AjaxResult cancel(@PathVariable("id") Long id)
+    {
+        return toAjax(wmsOutboundOrderService.cancelOutboundOrder(id));
     }
 }

@@ -48,4 +48,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">#{createTime},</if>
          </trim>
     </insert>
+
+    <select id="selectRecordsByOrderNo" resultMap="WmsInventoryRecordResult">
+        select id, record_no, order_no, record_type, warehouse_id, location_id, material_id,
+               change_qty, before_qty, after_qty, create_by, create_time
+          from wms_inventory_record
+         where order_no = #{orderNo}
+           and record_type = #{recordType}
+         order by id
+    </select>
 </mapper>

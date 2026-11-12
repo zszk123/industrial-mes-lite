@@ -107,4 +107,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             available_qty = available_qty + #{addQty},
             update_by = #{updateBy}
     </insert>
+
+    <update id="retrieveInventory">
+        update wms_inventory
+           set available_qty = available_qty - #{changeQty},
+               update_by = #{updateBy}
+         where location_id = #{locationId}
+           and material_id = #{materialId}
+           and available_qty &gt;= #{changeQty}
+    </update>
 </mapper>

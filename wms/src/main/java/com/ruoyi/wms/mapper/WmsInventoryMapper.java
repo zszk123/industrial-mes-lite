@@ -94,4 +94,16 @@ public interface WmsInventoryMapper
     public int upsertAddInventory(@Param("warehouseId") Long warehouseId, @Param("locationId") Long locationId,
                                   @Param("materialId") Long materialId, @Param("addQty") Long addQty,
                                   @Param("createBy") String createBy, @Param("updateBy") String updateBy);
+
+    /**
+     * 取消入库时扣回库存（按库位+物料定位，WHERE 携带 available_qty >= 数量防止扣成负数）
+     *
+     * @param locationId 库位ID
+     * @param materialId 物料ID
+     * @param changeQty 扣回数量
+     * @param updateBy 操作人
+     * @return 影响行数（0表示可用库存不足，说明已入库物料被领用，无法取消）
+     */
+    public int retrieveInventory(@Param("locationId") Long locationId, @Param("materialId") Long materialId,
+                                 @Param("changeQty") Long changeQty, @Param("updateBy") String updateBy);
 }

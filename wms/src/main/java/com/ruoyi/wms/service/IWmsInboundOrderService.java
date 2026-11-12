@@ -67,4 +67,13 @@ public interface IWmsInboundOrderService
      * @return 结果
      */
     public int completeInboundOrder(Long id);
+
+    /**
+     * 取消入库单（待验收 → 已取消；已完成入库 → 回溯流水扣回库存后 → 已取消）
+     * 流程：查主单状态 → Redis 幂等防重 → 查询 INBOUND 流水逐条扣回库存 → 状态 CAS 更新 → 删除幂等键
+     *
+     * @param id 入库单主键
+     * @return 结果
+     */
+    public int cancelInboundOrder(Long id);
 }

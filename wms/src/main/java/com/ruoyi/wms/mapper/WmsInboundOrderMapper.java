@@ -69,4 +69,14 @@ public interface WmsInboundOrderMapper
      * @return 影响行数（0表示单据状态已变更或不存在）
      */
     public int completeWmsInboundOrder(@Param("id") Long id, @Param("updateBy") String updateBy);
+
+    /**
+     * 取消入库单（状态 CAS：仅当当前状态为"待验收/已完成入库"时更新为"已取消"）
+     * 状态为"已完成入库"时，需先在业务层回溯 INBOUND 流水扣回库存，再执行本 CAS
+     *
+     * @param id 入库单主键
+     * @param updateBy 取消操作人
+     * @return 影响行数（0表示单据已取消或不存在）
+     */
+    public int cancelWmsInboundOrder(@Param("id") Long id, @Param("updateBy") String updateBy);
 }

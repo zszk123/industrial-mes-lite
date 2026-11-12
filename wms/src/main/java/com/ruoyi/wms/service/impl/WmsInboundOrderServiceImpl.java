@@ -42,6 +42,9 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
     /** 流水类型：入库增加 */
     private static final String RECORD_TYPE_INBOUND = "INBOUND";
 
+    /** 取消操作 Redis 幂等键前缀 */
+    private static final String CANCEL_IDEMPOTENT_KEY = "wms:inbound:cancel:";
+
     @Autowired
     private WmsInboundOrderMapper wmsInboundOrderMapper;
 
@@ -256,5 +259,69 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
         record.setCreateBy(operator);
         record.setCreateTime(DateUtils.getNowDate());
         wmsInventoryRecordMapper.insertWmsInventoryRecord(record);
+    }
+
+    /**
+     * 取消入库单
+     *
+     * 流程2：待验收 → 已取消，直接修改状态
+     * 流程3：已完成入库 → 已取消，查询 INBOUND 流水逐条扣回库存后修改状态
+     *
+     * 执行顺序：查主单状态 → Redis 幂等 → 查询流水逐个回溯 → 更改状态 → 删除幂等键
+     *
+     * @param id 入库单主键
+     * @return 结果
+     */
+    @Override
+    @Transactional
+    public int cancelInboundOrder(Long id)
+    {
+        // 1. 查询当前主单的状态
+        WmsInboundOrder order = wmsInboundOrderMapper.selectWmsInboundOrderById(id);
+        if (order == null)
+        {
+            throw new ServiceException("入库单不存在");
+        }
+        if (Long.valueOf(3L).equals(order.getStatus()))
+        {
+            throw new ServiceException("单据已取消，请勿重复操作");
+        }
+
+        // 2. Redis 设置幂等
+        String idempotentKey = CANCEL_IDEMPOTENT_KEY + order.getOrderNo();
+        if (!redisCache.setCacheObjectIfAbsent(idempotentKey, "1", 10, TimeUnit.SECONDS))
+        {
+            throw new ServiceException("取消请求处理中，请勿重复提交");
+        }
+
+        String operator = SecurityUtils.getUsername();
+
+        // 3. 已完成入库的单据：查询流水逐个回溯，将入库增加的库存扣回
+        //    WHERE 携带 available_qty >= 数量防负数，扣不动说明物料已被领用
+        if (Long.valueOf(1L).equals(order.getStatus()))
+        {
+            List<WmsInventoryRecord> records = wmsInventoryRecordMapper.selectRecordsByOrderNo(order.getOrderNo(), RECORD_TYPE_INBOUND);
+            if (records == null || records.isEmpty())
+            {
+                throw new ServiceException("未找到入库流水记录，无法扣回库存，请联系管理员核查数据");
+            }
+            for (WmsInventoryRecord record : records)
+            {
+                int rows = wmsInventoryMapper.retrieveInventory(record.getLocationId(), record.getMaterialId(),
+                        record.getChangeQty(), operator);
+                if (rows == 0)
+                {
+                    throw new ServiceException("物料当前可用库存不足（已被领用），无法取消入库");
+                }
+            }
+        }
+
+        // 4. 更改状态：CAS，仅当状态仍为"待验收/已完成入库"时更新为"已取消"
+        int rows = wmsInboundOrderMapper.cancelWmsInboundOrder(id, operator);
+        if (rows == 0)
+        {
+            throw new ServiceException("单据状态已变更，请刷新后重试");
+        }
+        return 1;
     }
 }
