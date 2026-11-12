@@ -151,7 +151,7 @@ CREATE TABLE `wms_inbound_order` (
 `order_no` varchar(64) NOT NULL COMMENT '入库单号(唯一业务单号，防重幂等)',
 `order_type` tinyint NOT NULL DEFAULT '1' COMMENT '入库类型(1-采购入库, 2-生产退料入库, 3-盘盈入库)',
 `warehouse_id` bigint NOT NULL COMMENT '目标入库仓库ID',
-`status` tinyint NOT NULL DEFAULT '0' COMMENT '单据状态(0-待验收, 1-已验收待上架, 2-已完成入库, 3-已取消)',
+`status` tinyint NOT NULL DEFAULT '0' COMMENT '单据状态(0-待验收, 1-已验收待上架, 2-已完成上架, 3-已取消)',
 `remark` varchar(500) DEFAULT NULL COMMENT '入库备注/供应商信息',
 `create_by` varchar(64) DEFAULT '' COMMENT '制单人',
 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '制单时间',

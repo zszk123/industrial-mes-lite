@@ -78,4 +78,20 @@ public interface WmsInventoryMapper
      * @return 影响行数（0表示可用库存不足）
      */
     public int deductInventory(@Param("id") Long id, @Param("deductQty") Long deductQty);
+
+    /**
+     * 入库增加库存（存在则累加，不存在则新建）
+     * 依赖唯一键 uk_loc_mat(location_id, material_id) 实现 upsert 语义
+     *
+     * @param warehouseId 仓库ID
+     * @param locationId 库位ID
+     * @param materialId 物料ID
+     * @param addQty 入库数量
+     * @param createBy 创建人（首条记录时写入）
+     * @param updateBy 更新人（累加时写入）
+     * @return 影响行数
+     */
+    public int upsertAddInventory(@Param("warehouseId") Long warehouseId, @Param("locationId") Long locationId,
+                                  @Param("materialId") Long materialId, @Param("addQty") Long addQty,
+                                  @Param("createBy") String createBy, @Param("updateBy") String updateBy);
 }

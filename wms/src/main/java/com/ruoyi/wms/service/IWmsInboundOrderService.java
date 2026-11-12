@@ -58,4 +58,13 @@ public interface IWmsInboundOrderService
      * @return 结果
      */
     public int deleteWmsInboundOrderById(Long id);
+
+    /**
+     * 入库完成（待验收 → 已完成入库）
+     * 流程：Redis 幂等防重 → 校验明细库位与验收数量 → upsert 累加库存 → 写 INBOUND 审计流水 → 状态 CAS 更新
+     *
+     * @param id 入库单主键
+     * @return 结果
+     */
+    public int completeInboundOrder(Long id);
 }

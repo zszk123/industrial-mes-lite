@@ -1,6 +1,7 @@
 package com.ruoyi.wms.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import com.ruoyi.wms.domain.WmsInboundOrder;
 
 /**
@@ -58,4 +59,14 @@ public interface WmsInboundOrderMapper
      * @return 结果
      */
     public int deleteWmsInboundOrderByIds(Long[] ids);
+
+    /**
+     * 入库完成（状态 CAS：仅当当前状态为"待验收"时更新为"已完成入库"）
+     * WHERE 条件携带 status = 0，天然防止重复入库与并发状态覆盖
+     *
+     * @param id 入库单主键
+     * @param updateBy 验收上架人
+     * @return 影响行数（0表示单据状态已变更或不存在）
+     */
+    public int completeWmsInboundOrder(@Param("id") Long id, @Param("updateBy") String updateBy);
 }

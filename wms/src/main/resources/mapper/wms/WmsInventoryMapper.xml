@@ -99,4 +99,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          where id = #{id}
            and available_qty &gt;= #{deductQty}
     </update>
+
+    <insert id="upsertAddInventory">
+        insert into wms_inventory (warehouse_id, location_id, material_id, available_qty, create_by)
+        values (#{warehouseId}, #{locationId}, #{materialId}, #{addQty}, #{createBy})
+        on duplicate key update
+            available_qty = available_qty + #{addQty},
+            update_by = #{updateBy}
+    </insert>
 </mapper>

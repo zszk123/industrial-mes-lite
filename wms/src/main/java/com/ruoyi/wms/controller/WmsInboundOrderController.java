@@ -101,4 +101,21 @@ public class WmsInboundOrderController extends BaseController
     {
         return toAjax(wmsInboundOrderService.deleteWmsInboundOrderByIds(ids));
     }
+
+    /**
+     * 入库完成主流程（待验收 → 已完成入库，上架加库存）
+     * 接口文档：
+     * 请求方式：PUT /wms/inbound/{id}/complete
+     * 权限标识：wms:inbound:complete
+     * 前置条件：明细已通过"修改入库明细"接口指定上架库位(locationId)和验收合格数量(qualifiedQty)
+     * 成功返回：{"code":200,"msg":"操作成功"}
+     * 业务失败返回：{"code":500,"msg":"库位不存在或不属于当前入库仓库"}（示例）
+     */
+    @PreAuthorize("@ss.hasPermi('wms:inbound:complete')")
+    @Log(title = "入库完成", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/complete")
+    public AjaxResult complete(@PathVariable("id") Long id)
+    {
+        return toAjax(wmsInboundOrderService.completeInboundOrder(id));
+    }
 }
