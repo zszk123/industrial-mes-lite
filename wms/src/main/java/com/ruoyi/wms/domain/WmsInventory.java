@@ -34,14 +34,6 @@ public class WmsInventory extends BaseEntity
     @Excel(name = "可用库存量(可被领料分配)")
     private Long availableQty;
 
-    /** 锁定库存量(待拣货预占) */
-    @Excel(name = "锁定库存量(待拣货预占)")
-    private Long lockedQty;
-
-    /** 乐观锁版本号(防超卖核心字段) */
-    @Excel(name = "乐观锁版本号(防超卖核心字段)")
-    private Long version;
-
     public void setId(Long id) 
     {
         this.id = id;
@@ -87,29 +79,9 @@ public class WmsInventory extends BaseEntity
         this.availableQty = availableQty;
     }
 
-    public Long getAvailableQty() 
+    public Long getAvailableQty()
     {
         return availableQty;
-    }
-
-    public void setLockedQty(Long lockedQty) 
-    {
-        this.lockedQty = lockedQty;
-    }
-
-    public Long getLockedQty() 
-    {
-        return lockedQty;
-    }
-
-    public void setVersion(Long version) 
-    {
-        this.version = version;
-    }
-
-    public Long getVersion() 
-    {
-        return version;
     }
 
     @Override
@@ -120,8 +92,6 @@ public class WmsInventory extends BaseEntity
             .append("locationId", getLocationId())
             .append("materialId", getMaterialId())
             .append("availableQty", getAvailableQty())
-            .append("lockedQty", getLockedQty())
-            .append("version", getVersion())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

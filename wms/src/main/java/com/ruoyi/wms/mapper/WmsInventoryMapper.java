@@ -1,6 +1,7 @@
 package com.ruoyi.wms.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import com.ruoyi.wms.domain.WmsInventory;
 
 /**
@@ -58,4 +59,23 @@ public interface WmsInventoryMapper
      * @return 结果
      */
     public int deleteWmsInventoryByIds(Long[] ids);
+
+    /**
+     * 查询指定仓库下某物料有可用量的库存（可用量大于0，按可用量降序，优先从库存充足的库位扣减）
+     *
+     * @param warehouseId 仓库ID
+     * @param materialId 物料ID
+     * @return 可用库存集合
+     */
+    public List<WmsInventory> selectAvailableInventoryList(@Param("warehouseId") Long warehouseId, @Param("materialId") Long materialId);
+
+    /**
+     * 扣减库存
+     * WHERE 条件携带 available_qty >= 扣减数量，原子完成"校验+扣减"，防止超卖与并发脏写
+     *
+     * @param id 库存主键ID
+     * @param deductQty 扣减数量
+     * @return 影响行数（0表示可用库存不足）
+     */
+    public int deductInventory(@Param("id") Long id, @Param("deductQty") Long deductQty);
 }

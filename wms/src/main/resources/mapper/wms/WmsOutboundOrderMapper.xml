@@ -88,9 +88,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteWmsOutboundOrderByIds" parameterType="String">
-        delete from wms_outbound_order where id in 
+        delete from wms_outbound_order where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
+
+    <update id="approveWmsOutboundOrder">
+        update wms_outbound_order
+           set status = '1',
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where id = #{id}
+           and status = '0'
+    </update>
 </mapper>

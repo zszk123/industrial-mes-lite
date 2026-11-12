@@ -50,6 +50,21 @@ public class RedisCache
     }
 
     /**
+     * 缓存基本的对象（仅当 key 不存在时生效，SETNX 语义），用于接口幂等防重
+     *
+     * @param key 缓存的键值
+     * @param value 缓存的值
+     * @param timeout 时间（到期自动释放，防止异常后死锁）
+     * @param timeUnit 时间颗粒度
+     * @return true=设置成功（首次操作）；false=key 已存在（重复操作）
+     */
+    public <T> boolean setCacheObjectIfAbsent(final String key, final T value, final Integer timeout, final TimeUnit timeUnit)
+    {
+        Boolean success = redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
+        return success != null && success;
+    }
+
+    /**
      * 设置有效时间
      *
      * @param key Redis键

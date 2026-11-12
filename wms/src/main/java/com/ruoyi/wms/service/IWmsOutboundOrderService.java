@@ -58,4 +58,13 @@ public interface IWmsOutboundOrderService
      * @return 结果
      */
     public int deleteWmsOutboundOrderById(Long id);
+
+    /**
+     * 审核通过出库主单（待审核 → 已审核待出库，纯审批，不操作库存）
+     * 流程：Redis 幂等防重 → 校验明细 → 状态 CAS 更新；库存扣减在"出库完成"（1→2）执行
+     *
+     * @param id 出库主单主键
+     * @return 结果
+     */
+    public int approveOutboundOrder(Long id);
 }

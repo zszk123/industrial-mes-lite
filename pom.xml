@@ -177,6 +177,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- WMS仓储模块-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>wms</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

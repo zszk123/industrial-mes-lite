@@ -58,7 +58,7 @@ CREATE TABLE `wms_material` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物料基础信息表';
 
 -- -------------------------------------------------------------
--- 4. 实时库存表 (wms_inventory) -- 核心并发与锁控制
+-- 4. 实时库存表 (wms_inventory)
 -- 关联: 哪个仓库(warehouse_id) + 哪个库位(location_id) + 哪个物料(material_id)
 -- -------------------------------------------------------------
 DROP TABLE IF EXISTS `wms_inventory`;
@@ -68,8 +68,6 @@ CREATE TABLE `wms_inventory` (
  `location_id` bigint NOT NULL COMMENT '所属库位ID',
  `material_id` bigint NOT NULL COMMENT '物料ID',
  `available_qty` int NOT NULL DEFAULT '0' COMMENT '可用库存量(可被领料分配)',
- `locked_qty` int NOT NULL DEFAULT '0' COMMENT '锁定库存量(待拣货预占)',
- `version` int NOT NULL DEFAULT '0' COMMENT '乐观锁版本号(防超卖核心字段)',
  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
@@ -92,7 +90,7 @@ CREATE TABLE `wms_outbound_order` (
 `order_type` tinyint NOT NULL DEFAULT '1' COMMENT '出库类型(1-车间领料, 2-盘亏出库)',
 `warehouse_id` bigint NOT NULL COMMENT '出库仓库ID',
 `apply_dept_id` bigint NOT NULL COMMENT '申请领料部门ID(如 装配一班 dept_id)',
-`status` tinyint NOT NULL DEFAULT '0' COMMENT '单据状态(0-待审核, 1-已审核待出库/已锁库, 2-已完成出库, 3-已取消)',
+`status` tinyint NOT NULL DEFAULT '0' COMMENT '单据状态(0-待审核, 1-已审核待出库, 2-已完成出库, 3-已取消)',
 `remark` varchar(500) DEFAULT NULL COMMENT '领料原因',
 `create_by` varchar(64) DEFAULT '' COMMENT '申请人',
 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
@@ -129,7 +127,7 @@ CREATE TABLE `wms_inventory_record` (
 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '流水主键ID',
 `record_no` varchar(64) NOT NULL COMMENT '流水记录编号',
 `order_no` varchar(64) NOT NULL COMMENT '关联业务单号',
-`record_type` varchar(32) NOT NULL COMMENT '流水类型(INBOUND, OUTBOUND, LOCK, UNLOCK)',
+`record_type` varchar(32) NOT NULL COMMENT '流水类型(INBOUND, OUTBOUND)',
 `warehouse_id` bigint NOT NULL COMMENT '仓库ID',
 `location_id` bigint NOT NULL COMMENT '库位ID',
 `material_id` bigint NOT NULL COMMENT '物料ID',

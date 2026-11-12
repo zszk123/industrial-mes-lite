@@ -101,4 +101,20 @@ public class WmsOutboundOrderController extends BaseController
     {
         return toAjax(wmsOutboundOrderService.deleteWmsOutboundOrderByIds(ids));
     }
+
+    /**
+     * 审核通过出库单（待审核 → 已审核待出库，纯审批不操作库存）
+     * 接口文档：
+     * 请求方式：PUT /wms/outbound/{id}/approve
+     * 权限标识：wms:outbound:approve
+     * 成功返回：{"code":200,"msg":"操作成功"}
+     * 业务失败返回：{"code":500,"msg":"当前单据状态不允许审核"}（示例）
+     */
+    @PreAuthorize("@ss.hasPermi('wms:outbound:approve')")
+    @Log(title = "出库单审核", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/approve")
+    public AjaxResult approve(@PathVariable("id") Long id)
+    {
+        return toAjax(wmsOutboundOrderService.approveOutboundOrder(id));
+    }
 }

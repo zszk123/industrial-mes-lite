@@ -1,6 +1,7 @@
 package com.ruoyi.wms.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import com.ruoyi.wms.domain.WmsOutboundOrder;
 
 /**
@@ -58,4 +59,14 @@ public interface WmsOutboundOrderMapper
      * @return 结果
      */
     public int deleteWmsOutboundOrderByIds(Long[] ids);
+
+    /**
+     * 审核通过（状态 CAS：仅当当前状态为"待审核"时更新为"已审核待出库/已锁库"）
+     * WHERE 条件携带 status = 0，天然防止重复审核与并发状态覆盖
+     *
+     * @param id 出库主单主键
+     * @param updateBy 审核人
+     * @return 影响行数（0表示单据状态已变更或不存在）
+     */
+    public int approveWmsOutboundOrder(@Param("id") Long id, @Param("updateBy") String updateBy);
 }
