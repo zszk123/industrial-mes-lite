@@ -311,6 +311,9 @@ public class WmsOutboundOrderServiceImpl implements IWmsOutboundOrderService
             }
             remaining -= deductQty;
 
+            // 当前读取扣减后的真实值（FOR UPDATE 锁定读），回填流水防止并发下快照失真
+            long afterQty = wmsInventoryMapper.selectQtyByIdForUpdate(inventory.getId());
+
             // 写 OUTBOUND 审计流水：record_no 确定性生成（单号+库位+物料），唯一键兜底防重
             WmsInventoryRecord record = new WmsInventoryRecord();
             record.setRecordNo(order.getOrderNo() + "-OUT-" + inventory.getLocationId() + "-" + detail.getMaterialId());
@@ -320,8 +323,8 @@ public class WmsOutboundOrderServiceImpl implements IWmsOutboundOrderService
             record.setLocationId(inventory.getLocationId());
             record.setMaterialId(detail.getMaterialId());
             record.setChangeQty(deductQty);
-            record.setBeforeQty(inventory.getAvailableQty());
-            record.setAfterQty(inventory.getAvailableQty() - deductQty);
+            record.setBeforeQty(afterQty + deductQty);
+            record.setAfterQty(afterQty);
             record.setCreateBy(operator);
             record.setCreateTime(DateUtils.getNowDate());
             wmsInventoryRecordMapper.insertWmsInventoryRecord(record);

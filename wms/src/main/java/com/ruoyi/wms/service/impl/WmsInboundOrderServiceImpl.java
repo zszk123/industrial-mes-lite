@@ -232,18 +232,12 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
         }
         long addQty = detail.getQualifiedQty();
 
-        // 4. 查询现有库存记录，用于流水 before/after 快照
-        WmsInventory inventoryQuery = new WmsInventory();
-        inventoryQuery.setWarehouseId(order.getWarehouseId());
-        inventoryQuery.setLocationId(detail.getLocationId());
-        inventoryQuery.setMaterialId(detail.getMaterialId());
-        List<WmsInventory> existingList = wmsInventoryMapper.selectWmsInventoryList(inventoryQuery);
-        long beforeQty = (existingList != null && !existingList.isEmpty())
-                ? existingList.get(0).getAvailableQty() : 0L;
-
-        // 5. upsert 加库存：唯一键 uk_loc_mat 保证有记录累加、无记录新建
+        // 4. upsert 加库存：唯一键 uk_loc_mat 保证有记录累加、无记录新建
         wmsInventoryMapper.upsertAddInventory(order.getWarehouseId(), detail.getLocationId(),
                 detail.getMaterialId(), addQty, operator, operator);
+
+        // 5. 当前读取累加后的真实值（FOR UPDATE 锁定读），回填流水防止并发下快照失真
+        Long afterQty = wmsInventoryMapper.selectQtyByLocMatForUpdate(detail.getLocationId(), detail.getMaterialId());
 
         // 6. 写 INBOUND 审计流水：record_no 确定性生成（单号+库位+物料），唯一键兜底防重
         WmsInventoryRecord record = new WmsInventoryRecord();
@@ -254,8 +248,8 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
         record.setLocationId(detail.getLocationId());
         record.setMaterialId(detail.getMaterialId());
         record.setChangeQty(addQty);
-        record.setBeforeQty(beforeQty);
-        record.setAfterQty(beforeQty + addQty);
+        record.setBeforeQty(afterQty - addQty);
+        record.setAfterQty(afterQty);
         record.setCreateBy(operator);
         record.setCreateTime(DateUtils.getNowDate());
         wmsInventoryRecordMapper.insertWmsInventoryRecord(record);

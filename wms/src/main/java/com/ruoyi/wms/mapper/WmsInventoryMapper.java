@@ -106,4 +106,23 @@ public interface WmsInventoryMapper
      */
     public int retrieveInventory(@Param("locationId") Long locationId, @Param("materialId") Long materialId,
                                  @Param("changeQty") Long changeQty, @Param("updateBy") String updateBy);
+
+    /**
+     * 当前读查询可用库存（FOR UPDATE 锁定读，绕过 MVCC 快照）
+     * 用于扣减/累加后获取数据库真实值，回填审计流水的 before/after，防止并发下快照失真
+     *
+     * @param id 库存主键ID
+     * @return 当前真实可用库存量
+     */
+    public Long selectQtyByIdForUpdate(@Param("id") Long id);
+
+    /**
+     * 当前读查询可用库存（按库位+物料定位，FOR UPDATE 锁定读）
+     * 用于 upsert 累加后获取数据库真实值，回填审计流水的 before/after
+     *
+     * @param locationId 库位ID
+     * @param materialId 物料ID
+     * @return 当前真实可用库存量
+     */
+    public Long selectQtyByLocMatForUpdate(@Param("locationId") Long locationId, @Param("materialId") Long materialId);
 }

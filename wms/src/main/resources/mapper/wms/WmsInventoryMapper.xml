@@ -116,4 +116,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
            and material_id = #{materialId}
            and available_qty &gt;= #{changeQty}
     </update>
+
+    <!-- 当前读（FOR UPDATE）：扣减/累加后获取真实值，回填审计流水防止并发快照失真 -->
+    <select id="selectQtyByIdForUpdate" resultType="java.lang.Long">
+        select available_qty
+          from wms_inventory
+         where id = #{id}
+           for update
+    </select>
+
+    <select id="selectQtyByLocMatForUpdate" resultType="java.lang.Long">
+        select available_qty
+          from wms_inventory
+         where location_id = #{locationId}
+           and material_id = #{materialId}
+           for update
+    </select>
 </mapper>
