@@ -45,6 +45,9 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
     /** 取消操作 Redis 幂等键前缀 */
     private static final String CANCEL_IDEMPOTENT_KEY = "wms:inbound:cancel:";
 
+    /** 流水类型：取消入库扣回 */
+    private static final String RECORD_TYPE_CANCEL_IN = "CANCEL_IN";
+
     @Autowired
     private WmsInboundOrderMapper wmsInboundOrderMapper;
 
@@ -292,7 +295,7 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
 
         // 3. 已完成入库的单据：查询流水逐个回溯，将入库增加的库存扣回
         //    WHERE 携带 available_qty >= 数量防负数，扣不动说明物料已被领用
-        if (Long.valueOf(1L).equals(order.getStatus()))
+        if (Long.valueOf(2L).equals(order.getStatus()))
         {
             List<WmsInventoryRecord> records = wmsInventoryRecordMapper.selectRecordsByOrderNo(order.getOrderNo(), RECORD_TYPE_INBOUND);
             if (records == null || records.isEmpty())
@@ -307,6 +310,22 @@ public class WmsInboundOrderServiceImpl implements IWmsInboundOrderService
                 {
                     throw new ServiceException("物料当前可用库存不足（已被领用），无法取消入库");
                 }
+
+                // 当前读取扣回后的真实值，写 CANCEL_IN 审计流水（取消扣回动作留痕，保证账本可完整对账）
+                Long afterQty = wmsInventoryMapper.selectQtyByLocMatForUpdate(record.getLocationId(), record.getMaterialId());
+                WmsInventoryRecord cancelRecord = new WmsInventoryRecord();
+                cancelRecord.setRecordNo(order.getOrderNo() + "-CANCEL-" + record.getLocationId() + "-" + record.getMaterialId());
+                cancelRecord.setOrderNo(order.getOrderNo());
+                cancelRecord.setRecordType(RECORD_TYPE_CANCEL_IN);
+                cancelRecord.setWarehouseId(order.getWarehouseId());
+                cancelRecord.setLocationId(record.getLocationId());
+                cancelRecord.setMaterialId(record.getMaterialId());
+                cancelRecord.setChangeQty(record.getChangeQty());
+                cancelRecord.setBeforeQty(afterQty + record.getChangeQty());
+                cancelRecord.setAfterQty(afterQty);
+                cancelRecord.setCreateBy(operator);
+                cancelRecord.setCreateTime(DateUtils.getNowDate());
+                wmsInventoryRecordMapper.insertWmsInventoryRecord(cancelRecord);
             }
         }
 

@@ -91,7 +91,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <update id="completeWmsInboundOrder">
         update wms_inbound_order
-           set status = '1',
+           set status = '2',
                update_by = #{updateBy},
                update_time = sysdate()
          where id = #{id}

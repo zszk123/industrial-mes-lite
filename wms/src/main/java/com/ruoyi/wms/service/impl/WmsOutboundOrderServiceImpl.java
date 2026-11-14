@@ -47,6 +47,9 @@ public class WmsOutboundOrderServiceImpl implements IWmsOutboundOrderService
     /** 流水类型：出库扣减 */
     private static final String RECORD_TYPE_OUTBOUND = "OUTBOUND";
 
+    /** 流水类型：取消出库回补 */
+    private static final String RECORD_TYPE_CANCEL_OUT = "CANCEL_OUT";
+
     /** 库位状态：正常 */
     private static final String LOCATION_STATUS_NORMAL = "0";
 
@@ -263,6 +266,22 @@ public class WmsOutboundOrderServiceImpl implements IWmsOutboundOrderService
                 }
                 wmsInventoryMapper.upsertAddInventory(order.getWarehouseId(), record.getLocationId(),
                         record.getMaterialId(), record.getChangeQty(), operator, operator);
+
+                // 当前读取回补后的真实值，写 CANCEL_OUT 审计流水（取消回补动作留痕，保证账本可完整对账）
+                Long afterQty = wmsInventoryMapper.selectQtyByLocMatForUpdate(record.getLocationId(), record.getMaterialId());
+                WmsInventoryRecord cancelRecord = new WmsInventoryRecord();
+                cancelRecord.setRecordNo(order.getOrderNo() + "-CANCEL-" + record.getLocationId() + "-" + record.getMaterialId());
+                cancelRecord.setOrderNo(order.getOrderNo());
+                cancelRecord.setRecordType(RECORD_TYPE_CANCEL_OUT);
+                cancelRecord.setWarehouseId(order.getWarehouseId());
+                cancelRecord.setLocationId(record.getLocationId());
+                cancelRecord.setMaterialId(record.getMaterialId());
+                cancelRecord.setChangeQty(record.getChangeQty());
+                cancelRecord.setBeforeQty(afterQty - record.getChangeQty());
+                cancelRecord.setAfterQty(afterQty);
+                cancelRecord.setCreateBy(operator);
+                cancelRecord.setCreateTime(DateUtils.getNowDate());
+                wmsInventoryRecordMapper.insertWmsInventoryRecord(cancelRecord);
             }
         }
 

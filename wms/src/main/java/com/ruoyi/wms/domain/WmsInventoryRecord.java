@@ -23,7 +23,7 @@ public class WmsInventoryRecord extends BaseEntity
     /** 关联业务单号 */
     private String orderNo;
 
-    /** 流水类型(INBOUND, OUTBOUND) */
+    /** 流水类型(INBOUND, OUTBOUND, CANCEL_IN, CANCEL_OUT) */
     private String recordType;
 
     /** 仓库ID */
